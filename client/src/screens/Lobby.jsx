@@ -16,9 +16,12 @@ const LobbyScreen = () => {
     try {
       setCreatingRoom(true);
 
-      const response = await fetch("http://localhost:8000/api/rooms", {
-        method: "POST",
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/api/rooms`,
+        {
+          method: "POST",
+        },
+      );
 
       const data = await response.json();
 
@@ -33,36 +36,34 @@ const LobbyScreen = () => {
   };
 
   useEffect(() => {
-  const params = new URLSearchParams(location.search);
-  const roomFromLink = params.get("room");
+    const params = new URLSearchParams(location.search);
+    const roomFromLink = params.get("room");
 
-  if (roomFromLink) {
-    setRoom(roomFromLink);
-  }
-}, [location.search]);
-
- 
-const handleShareMeeting = async () => {
-  const meetingLink = `${window.location.origin}/?room=${encodeURIComponent(room)}`;
-
-  try {
-    if (navigator.share) {
-      await navigator.share({
-        title: "Join my meeting",
-        text: "Join me in this video meeting!",
-        url: meetingLink,
-      });
-    } else {
-      await navigator.clipboard.writeText(meetingLink);
-      alert("Meeting link copied!");
+    if (roomFromLink) {
+      setRoom(roomFromLink);
     }
-  } catch (error) {
-    if (error.name !== "AbortError") {
-      console.error("Error sharing meeting:", error);
-    }
-  }
-};
+  }, [location.search]);
 
+  const handleShareMeeting = async () => {
+    const meetingLink = `${window.location.origin}/?room=${encodeURIComponent(room)}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: "Join my meeting",
+          text: "Join me in this video meeting!",
+          url: meetingLink,
+        });
+      } else {
+        await navigator.clipboard.writeText(meetingLink);
+        alert("Meeting link copied!");
+      }
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        console.error("Error sharing meeting:", error);
+      }
+    }
+  };
 
   const handleSubmit = useCallback(
     (e) => {
