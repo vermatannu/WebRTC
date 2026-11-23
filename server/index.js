@@ -2,12 +2,23 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
+const crypto = require("crypto");
 
 const app = express();
 app.use(cors());
 
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
+
+// Create a new room
+app.post("/api/rooms", (req, res) => {
+  const roomId = crypto.randomBytes(4).toString("hex").toUpperCase();
+
+  res.status(200).json({
+    success: true,
+    roomId,
+  });
+});
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
@@ -39,6 +50,12 @@ io.on("connection", (socket) => {
   socket.on("ice:candidate", ({ to, candidate }) => {
     io.to(to).emit("ice:candidate", { from: socket.id, candidate });
   });
+
+  socket.on("call:ended", ({ to }) => {
+  io.to(to).emit("call:ended", {
+    from: socket.id,
+  });
+});
 
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
